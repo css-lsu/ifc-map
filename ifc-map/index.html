@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <script src='https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.js'></script>
+  <link href='https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.css' rel='stylesheet' />
+  <style>
+    body {
+      margin:0px;
+    }
+    #map {
+      width: 700px;
+      height: 800px;
+      position: absolute;
+    }
+    .side-bar {
+      width: 100px;
+      height: 800px;
+      background-color: rgba(50,50,50,.5);
+      position: absolute;
+      margin-left: 600px;
+      z-index: 10000;
+    }
+    .location-button {
+      height: 50px;
+      background-color: rgba(50,50,50,.5);
+    }
+  </style>
+</head>
+<body>
+  <div id='map' style=''></div>
+  <div class="side-bar">
+    <div class="location-button">Denham Springs</div>
+    <button>Plank Road</button>
+  </div>
+  <script>
+    mapboxgl.accessToken = 'pk.eyJ1IjoiYWNveDQyIiwiYSI6ImNrZjVtd3ZiejBvYnkyeW9nZnB4MzVva3EifQ.COv27lSO4vobAVLLHNVkQg';
+    var map = new mapboxgl.Map({
+      container: 'map',
+      style: 'mapbox://styles/legiongis/ckg13im88155l19pdgv294lu0',
+      center: [-90.901, 30.401],
+      zoom: 7.5
+    });
+
+    var hoveredStateId = null;
+
+    map.on('load', function() {
+      map.addSource('city-boundaries', {
+        type: "geojson",
+        data: "https://raw.githubusercontent.com/css-lsu/web-mapping/main/ifc-map/StudyAreas.geojson"
+      })
+
+      map.addLayer({
+        'id': 'cities',
+        "type": "fill",
+        "source": "city-boundaries",
+        "paint": {
+          "fill-color": "#00ffff",
+          "fill-outline-color": "#00ff00",
+        }
+      })
+
+      map.addLayer({
+        'id': 'cities-hover',
+        "type": "fill",
+        "source": "city-boundaries",
+        "paint": {
+          'fill-color': '#627BC1',
+          'fill-opacity': [
+            'case',
+            ['boolean', ['feature-state', 'hover'], false],
+            1,
+            0.5
+          ]
+        }
+      })
+
+      var popup = new mapboxgl.Popup({
+        closeButton: false,
+        closeOnClick: false
+      });
+
+
+      map.on('mouseenter', 'cities-hover', function (e) {
+
+        if (e.features.length > 0) {
+          if (hoveredStateId) {
+            map.setFeatureState(
+                { source: 'city-boundaries', id: hoveredStateId },
+                { hover: false }
+              );
+            }
+            console.log(e.features[0])
+            hoveredStateId = e.features[0].id;
+            console.log(hoveredStateId);
+            map.setFeatureState(
+              { source: 'city-boundaries', id: hoveredStateId },
+              { hover: true }
+            );
+          }
+
+      });
+
+      map.on('mouseleave', 'cities-hover', function () {
+        if (hoveredStateId) {
+          map.setFeatureState(
+            { source: 'city-boundaries', id: hoveredStateId },
+            { hover: false }
+          );
+        }
+        hoveredStateId = null;
+      });
+
+      map.on('mouseenter', 'cities', function (e) {
+        // Change the cursor style as a UI indicator.
+        map.getCanvas().style.cursor = 'pointer';
+
+        var lng = e.features[0].properties.lbl_x;
+        var lat = e.features[0].properties.lbl_y;
+        var description = e.features[0].properties.NAME;
+
+        // Populate the popup and set its coordinates
+        // based on the feature found.
+        // console.log(coordinates)
+        popup.setLngLat([lng, lat]).setHTML(description).addTo(map);
+
+      });
+
+      map.on('mouseleave', 'cities', function () {
+        map.getCanvas().style.cursor = '';
+        // popup.remove();
+      });
+
+      map.on('click', 'cities', function (e) {
+
+        var geom = e.features[0].geometry;
+
+        console.log("feature at click:")
+        console.log(e.features[0].properties)
+        // map.flyTo({
+        //   center: e.features[0].geometry.coordinates[0]
+        // });
+
+        var coordinates = geom.coordinates[0];
+        console.log("coordinates:")
+        console.log(coordinates)
+        console.log(geom.coordinates.length)
+
+        // Pass the first coordinates in the LineString to `lngLatBounds` &
+        // wrap each coordinate pair in `extend` to include them in the bounds
+        // result. A variation of this technique could be applied to zooming
+        // to the bounds of multiple Points or Polygon geomteries - it just
+        // requires wrapping all the coordinates with the extend method.
+        // var bounds = coordinates.reduce(function (bounds, coord) {
+        //   return bounds.extend(coord);
+        // }, new mapboxgl.LngLatBounds([coordinates[0], coordinates[0]]));
+        // console.log("bounds made")
+        // console.log(bounds);
+
+        var bounds = [
+          e.features[0].properties.x1,
+          e.features[0].properties.y1,
+          e.features[0].properties.x2,
+          e.features[0].properties.y2,
+        ]
+
+        map.fitBounds(bounds, {
+          padding: 20
+        });
+
+      });
+    });
+
+
+
+
+  </script>
+</body>
+</html>
