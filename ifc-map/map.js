@@ -13,7 +13,7 @@ if (window.name == "") {
   showRegion = window.name;
 }
 
-var regionText = "This is the capital where we worked..."
+var regionText = "This is the capital region where we worked..."
 var watershedText = "click to show the Amite watershed."
 
 function setText(text) {
@@ -22,7 +22,6 @@ function setText(text) {
 
 var startText = "<em>use the buttons below to explore the communities we have worked with</em>"
 setText(startText)
-var capRegionText = ""
 
 function freezeBounds() {
   map.setMaxBounds(map.getBounds());
@@ -65,6 +64,10 @@ var buttonHover = function () {
   studyAreasFeatures.forEach(function(feature) {
     if (feature.properties.id == id) {
       setText(feature.properties.desc);
+    } else if (id == "full-extent") {
+      setText(regionText);
+    } else if (id == "watershed-extent") {
+      setText(watershedText);
     }
   });
 }
@@ -90,6 +93,8 @@ var buttonZoom = function () {
       mskFadeDir = "out";
       comFadeDir = "in";
 
+      setText(regionText);
+
       bounds = initialBounds;
       break
 
@@ -97,6 +102,8 @@ var buttonZoom = function () {
       wsdFadeDir = "in";
       mskFadeDir = "out";
       comFadeDir = "out";
+
+      setText(watershedText);
 
       bounds = [
         amiteFeature.properties.x1,
