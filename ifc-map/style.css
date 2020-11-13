@@ -1,10 +1,39 @@
 body {
   margin:0px;
 }
-#map {
+.wrapper {
   width: 700px;
   height: 800px;
+}
+#map {
+  /* top: 100px; */
+  width: 700px;
+  height: 700px;
   position: absolute;
+}
+.mapboxgl-ctrl-top-left {
+  top: 75px;
+}
+.top-bar {
+  height: 75px;
+  width: 700px;
+  background-color: rgba(0, 0, 0, .5);
+  position: absolute;
+  z-index: 10000;
+}
+#desc-box {
+  margin: 0px;
+  color: white;
+}
+.description-text {
+  font-size: 1.15em;
+  width: 75%;
+  padding: 10px;
+}
+.description-img {
+  width: 25%;
+  background: red;
+  display: inline;
 }
 .side-bar {
   width: 100px;
@@ -13,16 +42,42 @@ body {
   margin-left: 600px;
   z-index: 10000;
 }
+.bottom-bar {
+  display: flex;
+  justify-content: center;
+  position: absolute;
+  top: 700px;
+  width: 700px;
+  background-color: rgba(50,50,50,.3);
+}
+.tier1 {
+  position: absolute;
+  top: 700px;
+  width: 700px;
+}
+.tier2 {
+  position: absolute;
+  top: 750px;
+  width: 700px;
+}
 .loc-button {
   color: white;
-  height: 100px;
-  width: 100%;
-  background-color: rgba(50,50,50,.5);
+  background-color: rgba(50,50,50,.7);
   text-align: center;
   vertical-align: middle;
+  float:left;
+  clear:none;
+  height: 50px;
+
+}
+.tier1 .loc-button {
+  width: 150px;
+}
+.tier1 .loc-button {
+  width: 200px;
 }
 .loc-button:hover, .loc-button.active {
-  background-color: rgba(150,150,150,.9);
+  background-color: rgba(50,50,50,.9);
 }
  /* {
   background-color: rgba(50,50,50,.9);

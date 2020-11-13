@@ -12,13 +12,28 @@
   <link href='style.css' rel='stylesheet' />
 </head>
 <body>
-  <div id='map' style=''></div>
-  <div class="side-bar">
-    <button id="full-extent" class="loc-button"><p>Region</p></button>
-    <button id="north-br" class="loc-button"><p>North Baton Rouge</p></button>
-    <button id="ds" class="loc-button"><p>Denham Springs</p></button>
-    <button id="sorrento" class="loc-button">Sorrento</button>
-    <button id="baker" class="loc-button">Baker</button>
+  <div class="wrapper">
+    <div class="top-bar">
+      <div class="description-text">
+        <p id="desc-box"></p>
+      </div>
+      <div class="description-img">
+        <img id="imgbox" src="" />
+      </div>
+    </div>
+    <div id='map' style=''></div>
+    <!-- <div class="side-bar">
+      <button id="full-extent" class="loc-button"><p>Region</p></button>
+      <button id="north-br" class="loc-button"><p>North Baton Rouge</p></button>
+      <button id="ds" class="loc-button"><p>Denham Springs</p></button>
+      <button id="sorrento" class="loc-button">Sorrento</button>
+      <button id="baker" class="loc-button">Baker</button>
+    </div> -->
+    <div class="bottom-bar tier1">
+      <button id="full-extent" class="loc-button active"><p>Capital Region</p></button>
+      <button id="watershed-extent" class="loc-button"><p>Amite River Watershed</p></button>
+    </div>
+    <div id="communities-bar" class="bottom-bar tier2"></div>
   </div>
   <script src='map.js'></script>
 </body>
