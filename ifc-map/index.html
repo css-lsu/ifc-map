@@ -15,7 +15,7 @@
   <div class="wrapper">
     <div class="top-bar">
       <div class="description-text">
-        <p id="desc-box"></p>
+        <p id="desc-box"><em>use the buttons below to explore the communities we have worked with</em></p>
       </div>
       <div class="description-img">
         <img id="imgbox" src="" />
@@ -29,11 +29,12 @@
       <button id="sorrento" class="loc-button">Sorrento</button>
       <button id="baker" class="loc-button">Baker</button>
     </div> -->
-    <div class="bottom-bar tier1">
-      <button id="full-extent" class="loc-button active"><p>Capital Region</p></button>
-      <button id="watershed-extent" class="loc-button"><p>Amite River Watershed</p></button>
+    <div class="bottom-bar">
+      <div class="bottom-bar-row tier1">
+        <button id="full-extent" title="Show Capital Region" class="loc-button"><p>Capital Region</p></button>
+      </div>
+      <div id="communities-bar" class="bottom-bar-row tier2"></div>
     </div>
-    <div id="communities-bar" class="bottom-bar tier2"></div>
   </div>
   <script src='map.js'></script>
 </body>
