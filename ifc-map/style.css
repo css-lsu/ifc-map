@@ -1,10 +1,7 @@
 body {
   margin:0px;
 }
-.wrapper {
-  width: 700px;
-  height: 770px;
-}
+
 #map {
   /* top: 100px; */
   width: 700px;

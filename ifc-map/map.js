@@ -31,6 +31,7 @@ function fadeLayers(direction, layers, symbol, maxOpacityPercent) {
 var showRegion;
 if (window.name == "") {
   showRegion = "full-extent";
+
 } else {
   showRegion = window.name;
   $(".top-bar").hide();
