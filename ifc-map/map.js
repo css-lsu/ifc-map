@@ -5,7 +5,7 @@ var BASE_STYLE = 'mapbox://styles/legiongis/ckg13im88155l19pdgv294lu0'
 // var BASE_STYLE = 'mapbox://styles/acox42/ckg9x9i0b2smo18mkero6jvm3'
 var BASE_STYLE = 'mapbox://styles/acox42/ckgtxvv580c9w19kx5gwzc47c'
 // lindsey's style on her account
-// var BASE_STYLE = 'mapbox://styles/l-taylor9/ckigllktr5a7p19p95nj9nt7k'
+var BASE_STYLE = 'mapbox://styles/l-taylor9/ckigllktr5a7p19p95nj9nt7k'
 
 // some map behavior constants
 var INITIAL_BOUNDS = [-91.49, 30, -90.15, 31.03]
@@ -418,10 +418,10 @@ map.on('load', function() {
     }
   };
 
-  map.addLayer(huc10Lyr);
-  map.addLayer(huc8Lyr);
+  // map.addLayer(huc10Lyr);
+  // map.addLayer(huc8Lyr);
   // map.addLayer(amiteLyrWhite);
-  map.addLayer(amiteLyr);
+  // map.addLayer(amiteLyr);
 
   // map.addLayer({
   //   'id': 'cities-hover',
@@ -499,26 +499,26 @@ map.on('load', function() {
   //     }
   // },
 
-  map.addSource('parishCentroids', {
-      type: 'vector',
-      url: PARISH_CENTROIDS_MB_SRC
-    });
+  // map.addSource('parishCentroids', {
+  //     type: 'vector',
+  //     url: PARISH_CENTROIDS_MB_SRC
+  //   });
+  //
+  // var parishLabelsLyr = {
+  //     "id": "allparishes-centroids-cd7pvh",
+  //     "type": "symbol",
+  //     "source": "parishCentroids",
+  //     "source-layer": PARISH_CENTROIDS_MB_LYR,
+  //     "layout": {
+  //         "text-field": ["to-string", ["get", "NAMELSAD"]],
+  //         "text-font": ["DIN Pro Italic", "Arial Unicode MS Regular"],
+  //         "text-letter-spacing": 0.15,
+  //         "text-size": 14,
+  //         "text-allow-overlap": true
+  //     },
+  //     "paint": {}
+  // }
 
-  var parishLabelsLyr = {
-      "id": "allparishes-centroids-cd7pvh",
-      "type": "symbol",
-      "source": "parishCentroids",
-      "source-layer": PARISH_CENTROIDS_MB_LYR,
-      "layout": {
-          "text-field": ["to-string", ["get", "NAMELSAD"]],
-          "text-font": ["DIN Pro Italic", "Arial Unicode MS Regular"],
-          "text-letter-spacing": 0.15,
-          "text-size": 14,
-          "text-allow-overlap": true
-      },
-      "paint": {}
-  }
-
-  map.addLayer(parishLabelsLyr);
+  // map.addLayer(parishLabelsLyr);
 
 });
