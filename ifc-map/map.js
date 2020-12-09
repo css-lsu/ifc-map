@@ -1,3 +1,28 @@
+var MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoiYWNveDQyIiwiYSI6ImNrZjVtd3ZiejBvYnkyeW9nZnB4MzVva3EifQ.COv27lSO4vobAVLLHNVkQg'
+var BASE_STYLE = 'mapbox://styles/acox42/ckg9uw0dq6xp019petpmu77yf'
+var BASE_STYLE = 'mapbox://styles/legiongis/ckg13im88155l19pdgv294lu0'
+// var BASE_STYLE = 'mapbox://styles/mapbox/satellite-streets-v11'
+// var BASE_STYLE = 'mapbox://styles/acox42/ckg9x9i0b2smo18mkero6jvm3'
+var BASE_STYLE = 'mapbox://styles/acox42/ckgtxvv580c9w19kx5gwzc47c'
+// lindsey's style on her account
+// var BASE_STYLE = 'mapbox://styles/l-taylor9/ckigllktr5a7p19p95nj9nt7k'
+
+// some map behavior constants
+var INITIAL_BOUNDS = [-91.49, 30, -90.15, 31.03]
+var CAP_REGION_BOUNDS = [-91.41, 29.99, -90.44, 30.74];
+var CAP_REGION_TEXT = "This is the capital region where we worked..."
+
+// mapbox tileset uris and label names
+var HUC6_MB_SRC = 'mapbox://acox42.dhw9cd9r';
+var HUC6_MB_LYR = 'HU6LakeMaurepaBasin-05yq8z';
+var HUC8_MB_SRC = 'mapbox://acox42.8221d82f';
+var HUC8_MB_LYR = 'HU8Boundaries-7m6k8g';
+var HUC10_MB_SRC = 'mapbox://acox42.983n0sb2';
+var HUC10_MB_LYR = 'HU10Boundaries-7xz0h7';
+var PARISH_CENTROIDS_MB_SRC = 'mapbox://acox42.3ak5cakw';
+var PARISH_CENTROIDS_MB_LYR = "AllParishes_centroids-cd7pvh";
+
+
 const sleep = (milliseconds) => {
   return new Promise(resolve => setTimeout(resolve, milliseconds))
 }
@@ -42,50 +67,28 @@ if (window.name == "") {
 
 var currentId;
 
-var regionText = "This is the capital region where we worked..."
-// var watershedText = "click to show the Amite watershed."
-
-
-
-// var startText = ""
-// setText(startText)
-
-
-
-var initialBounds = [-91.49, 30, -90.15, 31.03]
-
-// -90.25394273105334, lat: 31.271595758102706 }
-//  // ​
-//  // _sw: Object { lng: 803209260933, lat: 30.11583561514432
-
-mapboxgl.accessToken = 'pk.eyJ1IjoiYWNveDQyIiwiYSI6ImNrZjVtd3ZiejBvYnkyeW9nZnB4MzVva3EifQ.COv27lSO4vobAVLLHNVkQg';
+mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN;
 var map = new mapboxgl.Map({
   container: 'map',
-  // style: 'mapbox://styles/legiongis/ckg13im88155l19pdgv294lu0',
-  // style: 'mapbox://styles/mapbox/satellite-streets-v11',
-  // style: 'mapbox://styles/acox42/ckg9uw0dq6xp019petpmu77yf',
-  style: 'mapbox://styles/acox42/ckg9x9i0b2smo18mkero6jvm3',
-  bounds: initialBounds,
-
-  // interactive: false,
+  style: BASE_STYLE,
+  bounds: INITIAL_BOUNDS,
 });
 var nav = new mapboxgl.NavigationControl({'showCompass': false})
 map.addControl(nav, 'top-left');
 
 var buttonHover = function (hoverId) {
+
+  // this allows a hover id to be passed from either a clicked button or
+  // clicked feature. (at least I think it does.... -AC 12-09-20)
   var id;
-  if (typeof this.id === 'undefined') {
-    id = hoverId;
-  } else {
-    id = this.id;
-  }
+  if (typeof this.id === 'undefined') { id = hoverId; } else { id = this.id; }
 
   if (showRegion == 'full-extent') {
     studyAreasFeatures.forEach(function(feature) {
       if (feature.properties.id == id) {
         setText(feature.properties.desc);
       } else if (id == "full-extent") {
-        setText(regionText);
+        setText(CAP_REGION_TEXT);
       }
       // else if (id == "watershed-extent") {
       //   setText(watershedText);
@@ -107,12 +110,10 @@ var buttonZoom = function (zoomTo) {
 
   var bounds, maskFadeDir, padding;
 
+  // this allows a zoom id to be passed from either a clicked button or
+  // clicked feature.
   var id;
-  if (typeof this.id === 'undefined') {
-    id = zoomTo;
-  } else {
-    id = this.id;
-  }
+  if (typeof this.id === 'undefined') { id = zoomTo; } else { id = this.id; }
 
   $("#"+id).addClass("active")
   showRegion = id;
@@ -125,9 +126,9 @@ var buttonZoom = function (zoomTo) {
 
       padding = 0;
 
-      setText(regionText);
+      setText(CAP_REGION_TEXT);
 
-      bounds = [-91.41, 29.99, -90.44, 30.74];
+      bounds = CAP_REGION_BOUNDS;
       break
 
     // case "watershed-extent":
@@ -180,8 +181,8 @@ var studyAreasFeatures = [];
 var communitiesJson = "Communities.geojson"
 $.getJSON(communitiesJson, function(data) {
   data['features'].forEach(function(feat) {
-    feat.id = feat.properties.id
-    studyAreasFeatures.push(feat)
+    feat.id = feat.properties.id;
+    studyAreasFeatures.push(feat);
     $("#communities-bar").append(
       $(`<button id="${feat.properties.id}" title="Show ${feat.properties.name}" class="loc-button">${feat.properties.name}</button>`)
     )
@@ -252,7 +253,7 @@ map.on('load', function() {
     "type": "line",
     "source": "study-areas",
     "paint": {
-      "line-color": "#ff0000",
+      "line-color": "#e35f3c",
       // "line-dasharray": [2, 2],
       "line-width": 2,
       "line-opacity": 0,
@@ -300,57 +301,37 @@ map.on('load', function() {
 
 
   // these are all of the watershed sources
-  // THESE ARE ALL DEPRECATED IN FAVOR OF THE LAYERS DIRECTLY
-  // IN THE BASEMAP STYLE
-//   map.addSource('huc6', {
-//     type: 'vector',
-//     url: 'mapbox://acox42.dhw9cd9r'
-//   });
-//
-//   var huc6Lyr = {
-//     'id': 'huc6-lyr',
-//     'type': 'line',
-//     'source': 'huc6',
-//     'source-layer': 'HU6LakeMaurepaBasin-05yq8z',
-//     'paint': {
-//       'line-color': '#000000',
-//       'line-width': 3,
-//       'line-opacity': 0,
-//     },
-//     'layout': {
-//      'line-cap': 'round',
-//      'line-join': 'round',
-//     }
-//   }
-//
-//   map.addSource('huc8', {
-//     type: 'vector',
-//     url: 'mapbox://acox42.8221d82f'
-//   });
-//  //  lng: -90.25394273105334, lat: 31.271595758102706 }
-//  // ​
-//  // _sw: Object { lng: -91.59803209260933, lat: 30.11583561514432
-//
-// // cap region
-// //  Object { lng: -90.34581483541355, lat: 31.084832047956866 }
-// // ​
-// // _sw: Object { lng: -91.53259758184667, lat: 30.063066682664797 }
-//
-//   var huc8Lyr = {
-//     'id': 'huc8-lyr',
-//     'type': 'line',
-//     'source': 'huc8',
-//     'source-layer': 'HU8Boundaries-7m6k8g',
-//     'paint': {
-//       'line-color': '#ffffff',
-//       "line-width": 2,
-//       'line-opacity': 0,
-//     },
-//     'layout': {
-//      'line-cap': 'round',
-//      'line-join': 'round',
-//     }
-//   };
+  // note urls are all defined at top of file
+  map.addSource('huc6', { type: "vector", url: HUC6_MB_SRC });
+  map.addSource('huc8', { type: 'vector', url: HUC8_MB_SRC });
+  map.addSource('huc10', { type: 'vector', url: HUC10_MB_SRC });
+
+  // definition of all watershed layers.
+  // note source-layer is defined at top of file
+  var huc8Lyr = {
+    'id': 'huc8-lyr',
+    'type': 'line',
+    'source': 'huc8',
+    'source-layer': HUC8_MB_LYR,
+    'paint': {
+      'line-color': [
+        "interpolate",
+        ["linear"],
+        ["zoom"],
+        0,
+        "hsla(293, 74%, 31%, 0.19)",
+        18,
+        "hsl(293, 74%, 31%)"
+      ],
+      "line-width": 1.5,
+      "line-dasharray": [2, 2],
+      'line-opacity': 1,
+    },
+    'layout': {
+     'line-cap': 'round',
+     'line-join': 'round',
+    }
+  };
 //
 //   var huc8LyrFill = {
 //     'id': 'huc8-lyr-fill',
@@ -368,70 +349,79 @@ map.on('load', function() {
 //     }
 //   };
 //
-//   map.addSource('amite-watershed', {
-//     type: "geojson",
-//     data: "AmiteWatershed.geojson",
-//   })
+
 //
-//   var amiteLyrWhite = {
-//     'id': 'amite-lyr-white',
-//     'type': 'line',
-//     'source': 'amite-watershed',
-//     'paint': {
-//       "line-color": "#ffffff",
-//       "line-width": 2,
-//       "line-opacity": 0,
-//     },
-//     'layout': {
-//      'line-cap': 'round',
-//      'line-join': 'round',
-//     }
-//   };
-//   var amiteLyr = {
-//     'id': 'amite-lyr',
-//     'type': 'line',
-//     'source': 'amite-watershed',
-//     'paint': {
-//       "line-color": "#ff0000",
-//       "line-dasharray": [2, 2],
-//       "line-width": 2,
-//       "line-opacity": 0,
-//     },
-//     'layout': {
-//      'line-cap': 'round',
-//      'line-join': 'round',
-//     }
-//   };
-//
-//
-//   map.addSource('huc10', {
-//     type: 'vector',
-//     url: 'mapbox://acox42.983n0sb2'
-//   });
-//
-//   var huc10Lyr = {
-//     'id': 'huc10-lyr',
-//     'type': 'line',
-//     'source': 'huc10',
-//     'source-layer': 'HU10Boundaries-7xz0h7',
-//     'paint': {
-//       'line-color': '#ffffff',
-//       'line-width': .5,
-//       'line-opacity': 0,
-//     },
-//     'layout': {
-//      'line-cap': 'round',
-//      'line-join': 'round',
-//     }
-//   };
-//
-//
-//   map.addLayer(huc8LyrFill);
-//   map.addLayer(huc8Lyr);
-//   map.addLayer(huc10Lyr);
-//   map.addLayer(huc6Lyr);
-//   map.addLayer(amiteLyrWhite);
-//   map.addLayer(amiteLyr);
+  var amiteLyrWhite = {
+    'id': 'amite-lyr-white',
+    'type': 'line',
+    'source': 'huc6',
+    'source-layer': HUC6_MB_LYR,
+    'paint': {
+      "line-color": "#ffffff",
+      "line-width": 3,
+      "line-opacity": 1,
+    },
+    'layout': {
+     'line-cap': 'round',
+     'line-join': 'round',
+    }
+  };
+  var amiteLyr = {
+    'id': 'amite-lyr',
+    'type': 'line',
+    'source': 'huc6',
+    'source-layer': HUC6_MB_LYR,
+    'paint': {
+      "line-color": [
+        "interpolate",
+        ["linear"],
+        ["zoom"],
+        2,
+        "hsla(263, 80%, 24%, 0.8)",
+        18,
+        "hsla(263, 80%,000000 24%, 0.56)"
+      ],
+      "line-dasharray": [2, 2],
+      "line-width": 3,
+      "line-opacity": 1,
+    },
+    'layout': {
+     'line-cap': 'round',
+     'line-join': 'round',
+    }
+  };
+
+
+
+  var huc10Lyr = {
+    'id': 'huc10-lyr',
+    'type': 'line',
+    'source': 'huc10',
+    'source-layer': HUC10_MB_LYR,
+    'paint': {
+      'line-color': [
+        "interpolate",
+        ["linear"],
+        ["zoom"],
+        5,
+        "hsla(290, 67%, 39%, 0)",
+        18,
+        "hsl(290, 67%, 39%)"
+      ],
+      'line-width': 1,
+      "line-dasharray": [2, 2],
+      'line-opacity': 1,
+    },
+    'layout': {
+     'line-cap': 'round',
+     'line-join': 'round',
+    }
+  };
+
+  map.addLayer(huc10Lyr);
+  map.addLayer(huc8Lyr);
+  // map.addLayer(amiteLyrWhite);
+  map.addLayer(amiteLyr);
 
   // map.addLayer({
   //   'id': 'cities-hover',
@@ -502,5 +492,33 @@ map.on('load', function() {
     // popup.remove();
   // });
 
+  // var compositeSrc = {
+  //     "composite": {
+  //         "url": "mapbox://acox42.983n0sb2,mapbox.mapbox-streets-v8,acox42.dhw9cd9r,acox42.8221d82f,acox42.3ak5cakw,mapbox.mapbox-terrain-v2",
+  //         "type": "vector"
+  //     }
+  // },
+
+  map.addSource('parishCentroids', {
+      type: 'vector',
+      url: PARISH_CENTROIDS_MB_SRC
+    });
+
+  var parishLabelsLyr = {
+      "id": "allparishes-centroids-cd7pvh",
+      "type": "symbol",
+      "source": "parishCentroids",
+      "source-layer": PARISH_CENTROIDS_MB_LYR,
+      "layout": {
+          "text-field": ["to-string", ["get", "NAMELSAD"]],
+          "text-font": ["DIN Pro Italic", "Arial Unicode MS Regular"],
+          "text-letter-spacing": 0.15,
+          "text-size": 14,
+          "text-allow-overlap": true
+      },
+      "paint": {}
+  }
+
+  map.addLayer(parishLabelsLyr);
 
 });
