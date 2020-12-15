@@ -1,0 +1,11 @@
+{
+"type": "FeatureCollection",
+"name": "StudyAreasBBoxes",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "x1": -91.161128, "y1": 30.59386, "x2": -91.147194, "y2": 30.606775, "lbl_x": -91.152967, "lbl_y": 30.600555, "name": "Baker Study Area", "id": null, "org": null, "year": null, "width": 0.013934, "height": 0.012915, "area": 0.00018, "perimeter": 0.053698 }, "geometry": { "type": "Polygon", "coordinates": [ [ [ -91.16112835, 30.593860187 ], [ -91.14719433499999, 30.593860187 ], [ -91.14719433499999, 30.606775366 ], [ -91.16112835, 30.606775366 ], [ -91.16112835, 30.593860187 ] ] ] } },
+{ "type": "Feature", "properties": { "x1": -90.972823, "y1": 30.45481, "x2": -90.94426, "y2": 30.48152, "lbl_x": -90.959468, "lbl_y": 30.468165, "name": "Denham Springs Study Area", "id": null, "org": null, "year": null, "width": 0.028563, "height": 0.02671, "area": 0.000763, "perimeter": 0.110546 }, "geometry": { "type": "Polygon", "coordinates": [ [ [ -90.972823, 30.45481 ], [ -90.94426, 30.45481 ], [ -90.94426, 30.48152 ], [ -90.972823, 30.48152 ], [ -90.972823, 30.45481 ] ] ] } },
+{ "type": "Feature", "properties": { "x1": -91.16355, "y1": 30.469948, "x2": -91.108933, "y2": 30.493521, "lbl_x": -91.136241, "lbl_y": 30.481735, "name": "North Baton Rouge Study Area", "id": null, "org": null, "year": null, "width": 0.054617, "height": 0.023573, "area": 0.001287, "perimeter": 0.15638 }, "geometry": { "type": "Polygon", "coordinates": [ [ [ -91.16355, 30.469948 ], [ -91.108933, 30.469948 ], [ -91.108933, 30.493521 ], [ -91.16355, 30.493521 ], [ -91.16355, 30.469948 ] ] ] } },
+{ "type": "Feature", "properties": { "x1": -90.879298, "y1": 30.185724, "x2": -90.854127, "y2": 30.196201, "lbl_x": -90.874059, "lbl_y": 30.190963, "name": "Sorrento Study Area", "id": null, "org": null, "year": null, "width": 0.025171, "height": 0.010477, "area": 0.000264, "perimeter": 0.071296 }, "geometry": { "type": "Polygon", "coordinates": [ [ [ -90.879297621, 30.185724347 ], [ -90.854126547, 30.185724347 ], [ -90.854126547, 30.196201386 ], [ -90.879297621, 30.196201386 ], [ -90.879297621, 30.185724347 ] ] ] } }
+]
+}

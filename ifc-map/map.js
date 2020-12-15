@@ -9,18 +9,30 @@ var BASE_STYLE = 'mapbox://styles/l-taylor9/ckigllktr5a7p19p95nj9nt7k'
 
 // some map behavior constants
 var INITIAL_BOUNDS = [-91.49, 30, -90.15, 31.03]
+var WELCOME_TEXT = "<em>use the buttons below to explore the communities we have worked with...</em>"
 var CAP_REGION_BOUNDS = [-91.41, 29.99, -90.44, 30.74];
-var CAP_REGION_TEXT = "This is the capital region where we worked..."
+
+var AMITE_BOUNDS = [-91.67, 29.89, -89.95, 31.21];
+var AMITE_TEXT = "Within the Amite River watershed, we ....."
+
 
 // mapbox tileset uris and label names
 var HUC6_MB_SRC = 'mapbox://acox42.dhw9cd9r';
 var HUC6_MB_LYR = 'HU6LakeMaurepaBasin-05yq8z';
 var HUC8_MB_SRC = 'mapbox://acox42.8221d82f';
-var HUC8_MB_LYR = 'HU8Boundaries-7m6k8g';
+var HUC8_MB_LYR = 'hu8boundaries-7m6k8g';
 var HUC10_MB_SRC = 'mapbox://acox42.983n0sb2';
 var HUC10_MB_LYR = 'HU10Boundaries-7xz0h7';
 var PARISH_CENTROIDS_MB_SRC = 'mapbox://acox42.3ak5cakw';
 var PARISH_CENTROIDS_MB_LYR = "AllParishes_centroids-cd7pvh";
+
+var IFC_ORANGE = '#e35f3c';
+var IFC_CSS = ['rgb', 207, 177, 76];
+var IFC_CSS_FILL = ['rgba', 207, 177, 76, .2];
+var IFC_STUDIO = ['rgb', 101, 198, 210];
+var IFC_STUDIO_FILL = ['rgba', 101, 198, 210, .2];
+var IFC_PARTNER = ['rgb', 145, 139, 195];
+var IFC_PARTNER_FILL = ['rgba', 145, 139, 195, .2];
 
 
 const sleep = (milliseconds) => {
@@ -33,33 +45,47 @@ function freezeBounds() {
 }
 
 function setText(text) {
-  $("#desc-box").html(text);
+  $("#description-box").html(`<p>${text}</p>`);
 }
+setText(WELCOME_TEXT);
 
-function fadeLayers(direction, layers, symbol, maxOpacityPercent) {
-  // symbol must be 'line' for line layers or 'fill' for poly layers
+function fadeLayers(direction, layers, maxOpacityPercent) {
+  if (maxOpacityPercent === undefined) {maxOpacityPercent = 100}
   for(var i = 0; i < maxOpacityPercent + 1; i++){
     var n;
     if (direction == "in") { n = i } else { n = maxOpacityPercent - i}
     sleep(500).then(() => {
       layers.forEach( function(layer) {
-        map.setPaintProperty(layer, symbol+'-opacity', n / 100);
+        map.setPaintProperty(layer, map.getLayer(layer).type+'-opacity', n / 100);
       })
     })
   };
 }
 
+function setCommunitiesToYellow() {
+  map.setPaintProperty('communities-fill', 'fill-color', IFC_CSS_FILL);
+  map.setPaintProperty('communities-line', 'line-color', IFC_CSS);
+}
+function setCommunitiesToOrange() {
+  map.setPaintProperty('communities-fill', 'fill-color', ['rgba', 0, 0, 0, 0]);
+  map.setPaintProperty('communities-line', 'line-color', IFC_ORANGE);
+}
+
+
 // This is how a single parameter can be passed from the iframe
 // to this script, and would allow this logic to conditionally construct
-// different maps for different iframes. Not currently in use.
-// <iframe name="full" src"..."></iframe>
+// different maps for different iframes.
+// <iframe name="full" src="..."></iframe>
 var showRegion;
+var pageType;
 if (window.name == "") {
-  showRegion = "full-extent";
+  showRegion = "initial-extent";
+  pageType = "mainPage";
 
 } else {
   showRegion = window.name;
-  $(".top-bar").hide();
+  pageType = "communityPage";
+  // $(".top-bar").hide();
   $(".bottom-bar").hide();
   // $("#map").css("border-radius", "5px")
   // $(".mapboxgl-ctrl-attrib").css("border-radius", "5px")
@@ -76,6 +102,11 @@ var map = new mapboxgl.Map({
 var nav = new mapboxgl.NavigationControl({'showCompass': false})
 map.addControl(nav, 'top-left');
 
+var popup = new mapboxgl.Popup({
+  closeButton: false,
+  closeOnClick: false
+});
+
 var buttonHover = function (hoverId) {
 
   // this allows a hover id to be passed from either a clicked button or
@@ -83,12 +114,12 @@ var buttonHover = function (hoverId) {
   var id;
   if (typeof this.id === 'undefined') { id = hoverId; } else { id = this.id; }
 
-  if (showRegion == 'full-extent') {
-    studyAreasFeatures.forEach(function(feature) {
+  if (showRegion == 'initial-extent' || showRegion == 'amite-extent') {
+    communitiesFeatures.forEach(function(feature) {
       if (feature.properties.id == id) {
         setText(feature.properties.desc);
-      } else if (id == "full-extent") {
-        setText(CAP_REGION_TEXT);
+      } else if (id == "initial-extent") {
+        setText(WELCOME_TEXT);
       }
       // else if (id == "watershed-extent") {
       //   setText(watershedText);
@@ -108,8 +139,6 @@ var buttonZoom = function (zoomTo) {
 
   $(".loc-button").removeClass("active")
 
-  var bounds, maskFadeDir, padding;
-
   // this allows a zoom id to be passed from either a clicked button or
   // clicked feature.
   var id;
@@ -118,17 +147,22 @@ var buttonZoom = function (zoomTo) {
   $("#"+id).addClass("active")
   showRegion = id;
 
-  switch (id) {
-    case "full-extent":
-      // wsdFadeDir = "out";
-      mskFadeDir = "out";
-      comFadeDir = "in";
+  switch (showRegion) {
+    case "amite-extent":
 
-      padding = 0;
+      setText(AMITE_TEXT);
 
-      setText(CAP_REGION_TEXT);
+      // begin zooming once the parameters have been acquired
+      map.fitBounds(AMITE_BOUNDS, { padding: 0 });
 
-      bounds = CAP_REGION_BOUNDS;
+      setCommunitiesToYellow();
+      // map.setPaintProperty(HUC8_MB_LYR, "line-color", ['match', ['get', 'name'],
+      //   "Amite", "red",
+      //   "black"
+      // ]);
+      fadeLayers('in', ['amite-highlight', 'amite-mask'])
+      fadeLayers('out', ['study-areas-line', 'study-areas-fill', 'communities-mask'])
+      fadeLayers('in', ['communities-line', 'communities-fill'])
       break
 
     // case "watershed-extent":
@@ -147,13 +181,12 @@ var buttonZoom = function (zoomTo) {
       // break
 
     default:
-      // wsdFadeDir = "out";
-      mskFadeDir = "in";
-      comFadeDir = "in";
 
-      padding = {top: 50, bottom: 50, left: 50, right: 50}
+      // clean up potential interaction artifacts
+      popup.remove();
+      map.getCanvas().style.cursor = '';
 
-      studyAreasFeatures.forEach(function(feature) {
+      communitiesFeatures.forEach(function(feature) {
         if (feature.properties.id == id) {
           setText(feature.properties.desc);
           bounds = [
@@ -164,28 +197,41 @@ var buttonZoom = function (zoomTo) {
           ]
         }
       });
+
+      // begin zooming once the parameters have been acquired
+      // currently unneeded extra padding control syntax
+      // padding = {top: 50, bottom: 50, left: 50, right: 50}
+      map.fitBounds(bounds, { padding: 50 });
+
+      setCommunitiesToOrange();
+      fadeLayers('in', [
+        'study-areas-line',
+        'study-areas-fill',
+        'communities-mask',
+        'communities-line',
+        'communities-fill'
+      ]);
+      fadeLayers('out', ['amite-highlight', 'amite-mask'])
+      break
   }
 
-  map.fitBounds(bounds, { padding: padding });
-
+  // freeze the map once the zoom is completed.
   map.once('moveend', freezeBounds);
 
-  fadeLayers(mskFadeDir, ['mask'], 'fill', 50)
-  fadeLayers(comFadeDir, ['communities-boundary', 'communities-boundary-white'], 'line', 100)
   // fadeLayers(wsdFadeDir,['huc6-lyr', 'huc8-lyr', 'huc10-lyr', 'amite-lyr', 'amite-lyr-white'],'line', 75)
   // fadeLayers(wsdFadeDir,['huc8-lyr-fill'],'fill', 75)
 }
 
 // acquire the geojson features for
-var studyAreasFeatures = [];
-var communitiesJson = "Communities.geojson"
-$.getJSON(communitiesJson, function(data) {
+var communitiesFeatures = [];
+var communitiesJsonFile = "Communities.geojson"
+$.getJSON(communitiesJsonFile, function(data) {
   data['features'].forEach(function(feat) {
     feat.id = feat.properties.id;
-    studyAreasFeatures.push(feat);
-    $("#communities-bar").append(
-      $(`<button id="${feat.properties.id}" title="Show ${feat.properties.name}" class="loc-button">${feat.properties.name}</button>`)
-    )
+    communitiesFeatures.push(feat);
+    // $("#communities-bar").append(
+    //   $(`<button id="${feat.properties.id}" title="Show ${feat.properties.name}" class="loc-button">${feat.properties.name}</button>`)
+    // )
   })
   $(".loc-button").click(buttonZoom);
   $(".loc-button").hover(buttonHover);
@@ -203,59 +249,88 @@ $.getJSON(communitiesJson, function(data) {
 
 map.on('load', function() {
 
-  map.addSource('study-areas', {
-    type: "geojson",
-    data: communitiesJson,
-  })
+  // this removes the incident layers which we don't need and cause an error.
+  // eventually they should be removed directly from the Style.
+  map.removeLayer('incident-closure-line-highlights-navigation')
+  map.removeLayer('incident-closure-lines-navigation')
+  map.removeLayer('incident-endpoints-navigation')
+  map.removeLayer('incident-startpoints-navigation')
+  map.removeSource('mapbox://mapbox.mapbox-incidents-v1')
 
-  map.addSource('study-areas-negative', {
+  map.addSource('study-areas-source', {
     type: "geojson",
-    data: "Communities_negative.geojson",
+    data: "StudyAreas.geojson",
   })
 
   map.addLayer({
-    'id': 'mask',
-    "type": "fill",
-    "source": "study-areas-negative",
+    'id': 'study-areas-line',
+    "type": "line",
+    "source": "study-areas-source",
     "paint": {
-      "fill-color": "#000000",
+      "line-color": ['match', ['get', 'proj_type'],
+        'css', IFC_CSS,
+        'studio', IFC_STUDIO,
+        'partner', IFC_PARTNER,
+        IFC_CSS, //default
+      ],
+      "line-width": 3,
+      "line-dasharray": [1, 1],
+      "line-opacity": 0,
+    }
+  })
+
+  map.addLayer({
+    'id': 'study-areas-fill',
+    "type": "fill",
+    "source": "study-areas-source",
+    "paint": {
+      "fill-color": ['match', ['get', 'proj_type'],
+        'css', IFC_CSS_FILL,
+        'studio', IFC_STUDIO_FILL,
+        'partner', IFC_PARTNER_FILL,
+        IFC_CSS_FILL, //default
+      ],
+      "fill-opacity": 0,
+    }
+  })
+
+  map.addSource('communities-source', {
+    type: "geojson",
+    data: communitiesJsonFile,
+  })
+
+  map.addSource('communities-mask-source', {
+    type: "geojson",
+    data: "CommunitiesMask.geojson",
+  })
+
+  map.addLayer({
+    'id': 'communities-mask',
+    "type": "fill",
+    "source": "communities-mask-source",
+    "paint": {
+      "fill-color": ['rgba', 0, 0, 0, .5],
       "fill-opacity": 0,
     }
   });
 
   map.addLayer({
-    'id': 'communities',
+    'id': 'communities-fill',
     "type": "fill",
-    "source": "study-areas",
+    "source": "communities-source",
     "paint": {
-      "fill-color": "#00ffff",
+      "fill-color": IFC_CSS,
       "fill-opacity": 0,
     }
   })
 
   map.addLayer({
-    'id': 'communities-boundary-white',
+    'id': 'communities-line',
     "type": "line",
-    "source": "study-areas",
-    "paint": {
-      "line-color": "#ffffff",
-      "line-width": 2,
-      "line-opacity": 0,
-    },
-    'layout': {
-     'line-cap': 'round',
-     'line-join': 'round',
-    }
-  })
-
-  map.addLayer({
-    'id': 'communities-boundary',
-    "type": "line",
-    "source": "study-areas",
+    "source": "communities-source",
     "paint": {
       "line-color": "#e35f3c",
-      // "line-dasharray": [2, 2],
-      "line-width": 2,
+      "line-width": 3,
       "line-opacity": 0,
     },
     'layout': {
@@ -264,19 +339,73 @@ map.on('load', function() {
     }
   })
 
-  map.on('mouseenter', 'communities', function (e) {
-    // console.log(e.features[0].properties.id)
-    if (currentId !== e.features[0].properties.id) {
-      currentId = e.features[0].properties.id;
-      console.log(currentId);
+  map.addSource('amite-mask-source', {
+    type: "geojson",
+    data: "AmiteWatershedMask.geojson",
+  })
+
+  map.addLayer({
+    'id': 'amite-mask',
+    "type": "fill",
+    "source": "amite-mask-source",
+    "paint": {
+      "fill-color": ['rgba', 0, 0, 0, .5],
+      "fill-opacity": 0,
     }
-    map.getCanvas().style.cursor = 'pointer';
-    // buttonHover(e.features[0].properties.id)
-    // buttonHover(e.features[0].properties.id)
-    // popup.remove();
   });
 
-  map.on('mousemove', 'communities', function (e) {
+  map.addLayer({
+    'id': 'amite-highlight',
+    'type': 'line',
+    'source': 'composite',
+    'source-layer': 'HU8Boundaries-7m6k8g',
+    "paint": {
+      "line-color": ['match', ['get', 'Name'],
+        "Amite", IFC_ORANGE,
+        ['rgba', 0, 0, 0, 0]
+      ],
+      "line-width": 3,
+      "line-opacity": 0,
+    },
+  })
+
+  map.on('mouseenter', 'communities-fill', function (e) {
+    // console.log(e.features[0].properties.id)
+    // if (currentId !== e.features[0].properties.id) {
+    //   currentId = e.features[0].properties.id;
+    //   console.log(currentId);
+    if (showRegion == "amite-extent") {
+      buttonHover(e.features[0].properties.id)
+      // Change the cursor style as a UI indicator.
+      map.getCanvas().style.cursor = 'pointer';
+
+      var lng = e.features[0].properties.lbl_x;
+      var lat = e.features[0].properties.lbl_y;
+      var description = e.features[0].properties.name;
+
+      // Populate the popup and set its coordinates
+      // var firstCoord = e.features[0].geometry.coordinates[0][0];
+      popup.setLngLat([lng, lat])
+        .setHTML(
+          `<p><strong>${e.features[0].properties.name}</p>`
+        )
+        .addTo(map);
+    }
+    // }
+
+  });
+
+  map.on('mouseleave', 'communities-fill', function (e) {
+    // console.log(e.features[0].properties.id)
+    if (showRegion == "amite-extent") {
+      setText(AMITE_TEXT);
+      map.getCanvas().style.cursor = '';
+      popup.remove()
+    }
+
+  });
+
+  map.on('mousemove', 'communities-fill', function (e) {
     // console.log(e)
     // if (currentId !== e.features[0].properties.id) {
     //   currentId = e.features[0].properties.id;
@@ -287,24 +416,22 @@ map.on('load', function() {
     // popup.remove();
   });
 
-  map.on('mouseleave', 'communities', function () {
-    map.getCanvas().style.cursor = '';
-    // popup.remove();
-  });
 
-  map.on('click', 'communities', function (e) {
+
+  map.on('click', 'communities-fill', function (e) {
 
     buttonZoom(e.features[0].properties.id)
   });
 
-  if (showRegion != "full-extent"){ buttonZoom(showRegion); }
+  // for the subset pages, zoom to the specified extent
+  if (showRegion != "initial-extent"){ buttonZoom(showRegion); }
 
 
   // these are all of the watershed sources
   // note urls are all defined at top of file
-  map.addSource('huc6', { type: "vector", url: HUC6_MB_SRC });
-  map.addSource('huc8', { type: 'vector', url: HUC8_MB_SRC });
-  map.addSource('huc10', { type: 'vector', url: HUC10_MB_SRC });
+  // map.addSource('huc6', { type: "vector", url: HUC6_MB_SRC });
+  // map.addSource('huc8', { type: 'vector', url: HUC8_MB_SRC });
+  // map.addSource('huc10', { type: 'vector', url: HUC10_MB_SRC });
 
   // definition of all watershed layers.
   // note source-layer is defined at top of file
@@ -438,11 +565,6 @@ map.on('load', function() {
   //   }
   // })
 
-  // var popup = new mapboxgl.Popup({
-  //   closeButton: false,
-  //   closeOnClick: false
-  // });
-
 
   // map.on('mouseenter', 'cities-hover', function (e) {
   //
@@ -472,20 +594,35 @@ map.on('load', function() {
   //   hoveredStateId = null;
   // });
 
-  // map.on('mouseenter', 'cities-hover', function (e) {
-    // Change the cursor style as a UI indicator.
-    // map.getCanvas().style.cursor = 'pointer';
-    //
-    // var lng = e.features[0].properties.lbl_x;
-    // var lat = e.features[0].properties.lbl_y;
-    // var description = e.features[0].properties.name;
+  map.on('mouseenter', 'study-areas-fill', function (e) {
 
-    // Populate the popup and set its coordinates
-    // based on the feature found.
-    // console.log(coordinates)
-    // popup.setLngLat([lng, lat]).setHTML(description).addTo(map);
+    // only add interaction if the map is zoomed to a specific community
+    if (showRegion != "initial-extent" && showRegion != "amite-extent") {
+      // Change the cursor style as a UI indicator.
+      map.getCanvas().style.cursor = 'pointer';
 
-  // });
+      var lng = e.features[0].properties.lbl_x;
+      var lat = e.features[0].properties.lbl_y;
+      var description = e.features[0].properties.name;
+
+      // Populate the popup and set its coordinates
+      var firstCoord = e.features[0].geometry.coordinates[0][0];
+      popup.setLngLat(firstCoord)
+        .setHTML(
+          `<p><strong>${e.features[0].properties.name}</strong><br>
+          ${e.features[0].properties.year}</p>`
+        )
+        .addTo(map);
+    }
+
+  });
+
+  map.on('mouseleave', 'study-areas-fill', function () {
+    if (showRegion != "initial-extent" && showRegion != "amite-extent") {
+      map.getCanvas().style.cursor = '';
+      popup.remove();
+    }
+  });
 
   // map.on('mouseleave', 'cities-hover', function () {
   //   map.getCanvas().style.cursor = '';

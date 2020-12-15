@@ -10,17 +10,16 @@
 </select>
 <div><pre id="iframe-code"></pre></div>
 <div id="iframe-wrap">
-<iframe id="map-frame" src="index.html" name="ascension-par" height=625 width=700></iframe>
+<iframe id="map-frame" src="index.html" name="ascension-par" height=700 width=700></iframe>
 </div>
   <script type="text/javascript">
   var resetRegion = function() {
     var iframeEl = document.getElementById("map-frame")
     iframeEl.name = document.getElementById("region-select").value
     iframeEl.src = iframeEl.src
-    console.log(iframeEl)
-    console.log(document.getElementById("iframe-wrap").innerHTML)
     document.getElementById("iframe-code").textContent = document.getElementById("iframe-wrap").innerHTML;
   }
+  resetRegion();
   </script>
 </body>
 

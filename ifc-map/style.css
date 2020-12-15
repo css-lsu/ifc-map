@@ -1,5 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat&display=swap');
+
+/* montserrat-regular - latin */
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 400;
+  src: local(''),
+       url('./fonts/montserrat-v15-latin-regular.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
+       url('./fonts/montserrat-v15-latin-regular.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}
+
+/* montserrat-italic - latin */
+@font-face {
+  font-family: 'Montserrat';
+  font-style: italic;
+  font-weight: 400;
+  src: local(''),
+       url('./fonts/montserrat-v15-latin-italic.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
+       url('./fonts/montserrat-v15-latin-italic.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}
+
+/* montserrat-700 - latin */
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 700;
+  src: local(''),
+       url('./fonts/montserrat-v15-latin-700.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
+       url('./fonts/montserrat-v15-latin-700.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}
+
+/* montserrat-700italic - latin */
+@font-face {
+  font-family: 'Montserrat';
+  font-style: italic;
+  font-weight: 700;
+  src: local(''),
+       url('./fonts/montserrat-v15-latin-700italic.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
+       url('./fonts/montserrat-v15-latin-700italic.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}
+
+
 body {
   margin:0px;
+  font-family: 'Montserrat', sans-serif;
+}
+
+button {
+  font-family: 'Montserrat', sans-serif;
 }
 
 #map {
@@ -16,22 +64,18 @@ body {
   height: 75px;
   width: 700px;
   background-color: rgba(0, 0, 0, .5);
-  /* position: absolute; */
-  z-index: 10000;
+  text-align: center;
 }
-#desc-box {
-  margin: 0px;
+#description-box {
+  font-size: 1.15em;
+  display: inline;
+  vertical-align: middle;
   color: white;
 }
-.description-text {
-  font-size: 1.15em;
-  width: 75%;
-  padding: 10px;
-}
-.description-img {
-  width: 25%;
-  background: red;
-  display: inline;
+
+#description-box p {
+  padding: 10px 50px;
+  margin: 0px;
 }
 .side-bar {
   width: 100px;
@@ -42,7 +86,8 @@ body {
 }
 .bottom-bar {
   width: 700px;
-  background-color: rgba(50,50,50,.3);
+  /* background-color: rgba(50,50,50,.3); */
+  background-color: rgba(0, 0, 0, .5);
 }
 .bottom-bar-row {
   display: flex;
@@ -65,8 +110,10 @@ body {
   clear:none;
   height: 35px;
   border-radius: 5px;
-
+  /* font-weight: 700; */
+  /* font-family: 'Montserrat', 'san-serif'; */
 }
+
 .tier1 .loc-button {
   width: 150px;
 }
@@ -76,10 +123,35 @@ body {
 .loc-button:hover, .loc-button.active {
   background-color: rgba(50,50,50,.9);
 }
- /* {
-  background-color: rgba(50,50,50,.9);
-} */
+
 .loc-button p {
   display:inline;
   vertical-align: middle;
 }
+
+.mapboxgl-popup {
+  font-family: 'Montserrat', sans-serif;
+  color: white;
+  font-size: 1.15em;
+}
+
+.mapboxgl-popup-content {
+  background-color: rgb(50, 50, 50) !important;
+}
+
+.mapboxgl-popup-anchor-top .mapboxgl-popup-tip,
+.mapboxgl-popup-anchor-top-left .mapboxgl-popup-tip,
+.mapboxgl-popup-anchor-top-right .mapboxgl-popup-tip {
+    border-bottom-color: rgb(50, 50, 50) !important;
+    }
+.mapboxgl-popup-anchor-bottom .mapboxgl-popup-tip,
+.mapboxgl-popup-anchor-bottom-left .mapboxgl-popup-tip,
+.mapboxgl-popup-anchor-bottom-right .mapboxgl-popup-tip {
+    border-top-color: rgb(50, 50, 50) !important;
+    }
+.mapboxgl-popup-anchor-left .mapboxgl-popup-tip {
+    border-right-color: rgb(50, 50, 50) !important;
+    }
+.mapboxgl-popup-anchor-right .mapboxgl-popup-tip {
+    border-left-color: rgb(50, 50, 50) !important;
+    }
