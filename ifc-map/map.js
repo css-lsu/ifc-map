@@ -213,12 +213,13 @@ $.getJSON(communitiesJsonFile, function(data) {
     //   $(`<button id="${feat.properties.id}" title="Show ${feat.properties.name}" class="loc-button">${feat.properties.name}</button>`)
     // )
   })
-  $(".loc-button").click(buttonZoom);
-  $(".loc-button").hover(buttonHover);
 });
 
 map.on('load', function() {
 
+  $(".loc-button").removeAttr('disabled');
+  $(".loc-button").click(buttonZoom);
+  $(".loc-button").hover(buttonHover, buttonLeave);
   // this removes the incident layers which we don't need and cause an error.
   // eventually they should be removed directly from the Style.
   map.removeLayer('incident-closure-line-highlights-navigation')
