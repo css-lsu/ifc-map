@@ -103,36 +103,43 @@ map.addControl(nav, 'top-left');
 
 var popup = new mapboxgl.Popup({
   closeButton: false,
-  closeOnClick: false
-});
-
-var buttonHover = function (hoverId) {
-
-  // this allows a hover id to be passed from either a clicked button or
-  // clicked feature. (at least I think it does.... -AC 12-09-20)
-  var id;
-  if (typeof this.id === 'undefined') { id = hoverId; } else { id = this.id; }
-
-  if (showRegion == 'initial-extent' || showRegion == 'amite-extent') {
-    communitiesFeatures.forEach(function(feature) {
-      if (feature.properties.id == id) {
-        setText(feature.properties.desc);
-      } else if (id == "initial-extent") {
-        setText(WELCOME_TEXT);
-      }
-      // else if (id == "watershed-extent") {
-      //   setText(watershedText);
-      // }
-    });
-  }
-
+  closeOnClick: false,
+})
+function removePopup() {
+  popup.removeClassName("popup-default");
+  popup.removeClassName("popup-css");
+  popup.removeClassName("popup-studio");
+  popup.removeClassName("popup-partner");
+  popup.setLngLat([0, 0])
 }
 
-// var buttonHoverLeave = function () {
-//   setText("");
-// }
+function addCommunityPopup(communityId) {
+  communitiesFeatures.forEach(function(feature) {
+    if (feature.properties.id == communityId) {
+      popup.addClassName('popup-css');
+      var firstCoord = feature.geometry.coordinates[0][0][0];
+
+      popup.setLngLat(firstCoord)
+        .setHTML(
+          `<strong>${feature.properties.name}</strong>`
+        )
+    }
+  });
+}
+
+var buttonHover = function (hoverId) {
+  if (showRegion == 'amite-extent') { addCommunityPopup(id) }
+}
+
+function buttonLeave() {
+  if (showRegion == 'amite-extent') {
+      setText(AMITE_TEXT);
+      removePopup();
+    };
+}
 
 var buttonZoom = function (zoomTo) {
+  map.stop();
   map.setMaxBounds(null);
   map.setMinZoom(0);
 
@@ -151,22 +158,17 @@ var buttonZoom = function (zoomTo) {
       setText(AMITE_TEXT);
 
       // begin zooming once the parameters have been acquired
-      map.fitBounds(AMITE_BOUNDS, { padding: 0 });
+      map.fitBounds(AMITE_BOUNDS, { padding: 0, pitch: 40, duration: 2500 });
 
       setCommunitiesToYellow();
-      // map.setPaintProperty(HUC8_MB_LYR, "line-color", ['match', ['get', 'name'],
-      //   "Amite", "red",
-      //   "black"
-      // ]);
-      fadeLayers('in', ['amite-highlight', 'amite-mask'])
       fadeLayers('out', ['study-areas-line', 'study-areas-fill', 'communities-mask'])
-      fadeLayers('in', ['communities-line', 'communities-fill'])
+      fadeLayers('in', ['communities-line', 'communities-fill', 'amite-highlight', 'amite-mask'])
       break
 
     default:
 
       // clean up potential interaction artifacts
-      popup.remove();
+      removePopup();
       map.getCanvas().style.cursor = '';
 
       communitiesFeatures.forEach(function(feature) {
@@ -184,9 +186,10 @@ var buttonZoom = function (zoomTo) {
       // begin zooming once the parameters have been acquired
       // currently unneeded extra padding control syntax
       // padding = {top: 50, bottom: 50, left: 50, right: 50}
-      map.fitBounds(bounds, { padding: 50 });
+      map.fitBounds(bounds, { padding: 50, pitch: 0, duration: 2500 });
 
       setCommunitiesToOrange();
+      fadeLayers('out', ['amite-highlight', 'amite-mask'])
       fadeLayers('in', [
         'study-areas-line',
         'study-areas-fill',
@@ -194,7 +197,7 @@ var buttonZoom = function (zoomTo) {
         'communities-line',
         'communities-fill'
       ]);
-      fadeLayers('out', ['amite-highlight', 'amite-mask'])
+
       break
   }
 
@@ -217,9 +220,15 @@ $.getJSON(communitiesJsonFile, function(data) {
 
 map.on('load', function() {
 
+  popup.setLngLat([0, 0]).setHTML("").addTo(map);
+
   $(".loc-button").removeAttr('disabled');
   $(".loc-button").click(buttonZoom);
   $(".loc-button").hover(buttonHover, buttonLeave);
+
+  // for the subset pages, zoom to the specified extent
+  if (showRegion != "initial-extent"){ buttonZoom(showRegion); }
+
   // this removes the incident layers which we don't need and cause an error.
   // eventually they should be removed directly from the Style.
   map.removeLayer('incident-closure-line-highlights-navigation')
@@ -333,7 +342,7 @@ map.on('load', function() {
     "paint": {
       "line-color": ['match', ['get', 'Name'],
         "Amite", IFC_ORANGE,
-        ['rgba', 0, 0, 0, 0]
+        ['rgba', 255, 255, 255, .5]
       ],
       "line-width": 3,
       "line-opacity": 0,
@@ -346,32 +355,15 @@ map.on('load', function() {
     //   currentId = e.features[0].properties.id;
     //   console.log(currentId);
     if (showRegion == "amite-extent") {
-      buttonHover(e.features[0].properties.id)
-      // Change the cursor style as a UI indicator.
+      addCommunityPopup(e.features[0].properties.id)
       map.getCanvas().style.cursor = 'pointer';
-
-      var lng = e.features[0].properties.lbl_x;
-      var lat = e.features[0].properties.lbl_y;
-      var description = e.features[0].properties.name;
-
-      // Populate the popup and set its coordinates
-      // var firstCoord = e.features[0].geometry.coordinates[0][0];
-      popup.setLngLat([lng, lat])
-        .setHTML(
-          `<p><strong>${e.features[0].properties.name}</p>`
-        )
-        .addTo(map);
     }
-    // }
-
   });
 
   map.on('mouseleave', 'communities-fill', function (e) {
-    // console.log(e.features[0].properties.id)
     if (showRegion == "amite-extent") {
-      setText(AMITE_TEXT);
       map.getCanvas().style.cursor = '';
-      popup.remove()
+      removePopup()
     }
 
   });
@@ -391,6 +383,8 @@ map.on('load', function() {
       var lat = e.features[0].properties.lbl_y;
       var description = e.features[0].properties.name;
 
+      popup.addClassName('popup-'+e.features[0].properties.proj_type);
+
       // Populate the popup and set its coordinates
       var firstCoord = e.features[0].geometry.coordinates[0][0];
       popup.setLngLat(firstCoord)
@@ -398,15 +392,13 @@ map.on('load', function() {
           `<p><strong>${e.features[0].properties.name}</strong><br>
           ${e.features[0].properties.year}</p>`
         )
-        .addTo(map);
     }
-
   });
 
   map.on('mouseleave', 'study-areas-fill', function () {
     if (showRegion != "initial-extent" && showRegion != "amite-extent") {
       map.getCanvas().style.cursor = '';
-      popup.remove();
+      removePopup();
     }
   });
 
