@@ -26,11 +26,87 @@ var IFC_STUDIO = ['rgb', 101, 198, 210];
 var IFC_STUDIO_FILL = ['rgba', 101, 198, 210, .2];
 var IFC_PARTNER = ['rgb', 145, 139, 195];
 var IFC_PARTNER_FILL = ['rgba', 145, 139, 195, .2];
-
+var LOOKUP = {
+  'css': {'line': IFC_CSS, 'fill': IFC_CSS_FILL},
+  'studio': {'line': IFC_STUDIO, 'fill': IFC_STUDIO_FILL},
+  'partner': {'line': IFC_PARTNER, 'fill': IFC_PARTNER_FILL},
 }
 
+function parseSheetValues(values) {
+  // turns a google sheet (sheet[0].values) that looks like this
+  // ====================================================
+  // id    | Name            | Description
+  // ----------------------------------------------------
+  // baker | Baker           | North of Baton Rouge, LA
+  // ds    | Denham Springs  | East of Baton Rouge, LA
+  // ====================================================
+  // into an object that looks like this
+  //   data = {
+  //     "baker": {
+  //       "Name": "Baker",
+  //       "Description": "North of Baton Rouge, LA"
+  //     },
+  //     ...
+  //   }
+  // The first column is used as id regardless of its name.
+  var outputData={}, lookup={}, rowId;
+  values.forEach(function(row, rowNum) {
+    if (rowNum == 0) {
+      row.forEach(function(value, colNum) {
+        lookup[colNum] = value
+      })
+    } else {
+      row.forEach(function(value, colNum) {
+        if (colNum == 0) {
+          rowId = value;
+          outputData[rowId] = {}
+        } else {
+          outputData[rowId][lookup[colNum]] = value;
+        }
+      })
+    }
+  });
+  return outputData
+}
 
+// google sheet acquisition code from https://handsondataviz.org/leaflet-maps-with-google-sheets.html
+// paste in your published Google Sheets URL from the browser address bar
+var googleDocURL = 'https://docs.google.com/spreadsheets/d/1wBNtw2eDsF3x-Ap5CE2b3CLdtHHjH4u0q24oC-g2-Bw/edit#gid=0';
+var spreadsheetId = googleDocURL.split('/d/')[1].split('/')[0];
+var apiUrl = 'https://sheets.googleapis.com/v4/spreadsheets/';
 
+// API key for Google Sheets on the CSS-LSU Google Project -AC 12-15-2020
+var googleApiKey = 'AIzaSyCZEfiriqBUbyfEWLrxi2mHcs9I5zGOcuM';
+
+var communitiesData, studyAreasData;
+// these weird paint rules will be filled out after the sheet data is loaded.
+var studyAreaLinePaint = ['match', ['get', 'id']];
+var studyAreaFillPaint = ['match', ['get', 'id']];
+$.when(
+  $.getJSON(apiUrl + spreadsheetId + '/values/Communities?key=' + googleApiKey),
+  $.getJSON(apiUrl + spreadsheetId + '/values/StudyAreas?key=' + googleApiKey),
+).done(function(communitiesDocData, studyAreasDocData) {
+
+  communitiesData = parseSheetValues(communitiesDocData[0].values);
+  studyAreasData = parseSheetValues(studyAreasDocData[0].values);
+
+  $(".loc-button").each(function() {
+    $(this).html(communitiesData[this.id]['Name'])
+  })
+
+  // fill out the conditional paint styles used in the study areas layer
+  // this is a little insane but it works.
+  for (const item in studyAreasData) {
+    studyAreaLinePaint.push(item);
+    studyAreaLinePaint.push(LOOKUP[studyAreasData[item]['ProjectType']]['line']);
+    studyAreaFillPaint.push(item);
+    studyAreaFillPaint.push(LOOKUP[studyAreasData[item]['ProjectType']]['fill']);
+  }
+
+  studyAreaLinePaint.push(IFC_CSS);
+  studyAreaFillPaint.push(IFC_CSS_FILL);
+
+});
 
 const sleep = (milliseconds) => {
   return new Promise(resolve => setTimeout(resolve, milliseconds))
@@ -121,14 +197,14 @@ function addCommunityPopup(communityId) {
 
       popup.setLngLat(firstCoord)
         .setHTML(
-          `<strong>${feature.properties.name}</strong>`
+          `<strong>${communitiesData[communityId]["Name"]}</strong>`
         )
     }
   });
 }
 
-var buttonHover = function (hoverId) {
-  if (showRegion == 'amite-extent') { addCommunityPopup(id) }
+var buttonHover = function () {
+  if (showRegion == 'amite-extent') { addCommunityPopup(this.id) }
 }
 
 function buttonLeave() {
@@ -173,7 +249,7 @@ var buttonZoom = function (zoomTo) {
 
       communitiesFeatures.forEach(function(feature) {
         if (feature.properties.id == id) {
-          setText(feature.properties.desc);
+          setText(communitiesData[id]["TopBarText"]);
           bounds = [
             feature.properties.x1,
             feature.properties.y1,
@@ -247,12 +323,7 @@ map.on('load', function() {
     "type": "line",
     "source": "study-areas-source",
     "paint": {
-      "line-color": ['match', ['get', 'proj_type'],
-        'css', IFC_CSS,
-        'studio', IFC_STUDIO,
-        'partner', IFC_PARTNER,
-        IFC_CSS, //default
-      ],
+      "line-color": studyAreaLinePaint,
       "line-width": 3,
       "line-dasharray": [1, 1],
       "line-opacity": 0,
@@ -264,15 +335,18 @@ map.on('load', function() {
     "type": "fill",
     "source": "study-areas-source",
     "paint": {
-      "fill-color": ['match', ['get', 'proj_type'],
-        'css', IFC_CSS_FILL,
-        'studio', IFC_STUDIO_FILL,
-        'partner', IFC_PARTNER_FILL,
-        IFC_CSS_FILL, //default
-      ],
+      "fill-color": studyAreaFillPaint,
       "fill-opacity": 0,
     }
   })
+
+  // old line-color match rules
+  // ['match', ['get', 'ProjectType'],
+  //   'css', IFC_CSS,
+  //   'studio', IFC_STUDIO,
+  //   'partner', IFC_PARTNER,
+  //   IFC_CSS, //default
+  // ],
 
   map.addSource('communities-source', {
     type: "geojson",
@@ -376,22 +450,18 @@ map.on('load', function() {
 
     // only add interaction if the map is zoomed to a specific community
     if (showRegion != "initial-extent" && showRegion != "amite-extent") {
-      // Change the cursor style as a UI indicator.
+
       map.getCanvas().style.cursor = 'pointer';
 
-      var lng = e.features[0].properties.lbl_x;
-      var lat = e.features[0].properties.lbl_y;
-      var description = e.features[0].properties.name;
-
-      popup.addClassName('popup-'+e.features[0].properties.proj_type);
+      var props = studyAreasData[e.features[0].properties.id]
+      var content = `<p><strong>${props['Name']}</strong><br>
+                    ${props['PopupText']}</p>`;
+      popup.addClassName('popup-'+props["ProjectType"]);
 
       // Populate the popup and set its coordinates
       var firstCoord = e.features[0].geometry.coordinates[0][0];
       popup.setLngLat(firstCoord)
-        .setHTML(
-          `<p><strong>${e.features[0].properties.name}</strong><br>
-          ${e.features[0].properties.year}</p>`
-        )
+        .setHTML(content)
     }
   });
 
