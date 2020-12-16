@@ -303,7 +303,7 @@ map.on('load', function() {
   $(".loc-button").hover(buttonHover, buttonLeave);
 
   // for the subset pages, zoom to the specified extent
-  if (showRegion != "initial-extent"){ buttonZoom(showRegion); }
+
 
   // this removes the incident layers which we don't need and cause an error.
   // eventually they should be removed directly from the Style.
@@ -471,5 +471,7 @@ map.on('load', function() {
       removePopup();
     }
   });
+
+  if (showRegion != "initial-extent"){ buttonZoom(showRegion); }
 
 });
