@@ -283,7 +283,7 @@ var buttonZoom = function (zoomTo) {
 
 // acquire the geojson features for
 var communitiesFeatures = [];
-var communitiesJsonFile = "Communities.geojson"
+var communitiesJsonFile = "geodata/Communities.geojson"
 $.getJSON(communitiesJsonFile, function(data) {
   data['features'].forEach(function(feat) {
     feat.id = feat.properties.id;
@@ -315,7 +315,7 @@ map.on('load', function() {
 
   map.addSource('study-areas-source', {
     type: "geojson",
-    data: "StudyAreas.geojson",
+    data: "geodata/StudyAreas.geojson",
   })
 
   map.addLayer({
@@ -355,7 +355,7 @@ map.on('load', function() {
 
   map.addSource('communities-mask-source', {
     type: "geojson",
-    data: "CommunitiesMask.geojson",
+    data: "geodata/CommunitiesMask.geojson",
   })
 
   map.addLayer({
@@ -395,7 +395,7 @@ map.on('load', function() {
 
   map.addSource('amite-mask-source', {
     type: "geojson",
-    data: "AmiteWatershedMask.geojson",
+    data: "geodata/AmiteWatershedMask.geojson",
   })
 
   map.addLayer({
