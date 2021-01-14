@@ -52,7 +52,8 @@ button {
 
 #map {
   /* top: 100px; */
-  width: 700px;
+  width: 100%;
+  max-width: 700px;
   height: 625px;
   /* top: 75px; */
   /* position: absolute; */
@@ -62,7 +63,8 @@ button {
 } */
 .top-bar {
   height: 75px;
-  width: 700px;
+  width: 100%;
+  max-width: 700px;
   background-color: rgba(0, 0, 0, .5);
   text-align: center;
 }
@@ -86,7 +88,8 @@ button {
   z-index: 10000;
 }
 .bottom-bar {
-  width: 700px;
+  width: 100%;
+  max-width: 700px;
   /* background-color: rgba(50,50,50,.3); */
   background-color: rgba(0, 0, 0, .5);
 }
@@ -95,12 +98,14 @@ button {
   justify-content: center;
 }
 .tier1 {
-  width: 700px;
+  width: 100%;
+  max-width: 700px;
 }
 .tier2 {
   /* position: absolute; */
   top: 735px;
-  width: 700px;
+  width: 100%;
+  max-width: 700px;
 }
 .loc-button {
   color: white;
