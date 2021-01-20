@@ -9,6 +9,8 @@ var WELCOME_TEXT = "<em>use the buttons below to explore the communities we have
 var AMITE_TEXT = "Within the Amite River watershed, we ....."
 var AMITE_BOUNDS = [-91.67, 29.89, -89.95, 31.21];
 
+var AMITE_SPECIAL_BOUNDS = [-91.82, 29.95, -89.87, 31.45];
+
 // mapbox tileset uris and label names
 var HUC6_MB_SRC = 'mapbox://acox42.dhw9cd9r';
 var HUC6_MB_LYR = 'HU6LakeMaurepaBasin-05yq8z';
@@ -241,6 +243,18 @@ var buttonZoom = function (zoomTo) {
       fadeLayers('in', ['communities-line', 'communities-fill', 'amite-highlight', 'amite-mask'])
       break
 
+    case "amite-special-extent":
+
+      setText(AMITE_TEXT);
+
+      // begin zooming once the parameters have been acquired
+      map.fitBounds(AMITE_SPECIAL_BOUNDS, { padding: 25, pitch: 0, duration: 2500 });
+
+      setCommunitiesToYellow();
+      fadeLayers('out', ['study-areas-line', 'study-areas-fill', 'communities-mask'])
+      fadeLayers('in', ['communities-line', 'communities-fill', 'amite-highlight', 'amite-mask'])
+      break
+
     default:
 
       // clean up potential interaction artifacts
@@ -428,14 +442,14 @@ map.on('load', function() {
     // if (currentId !== e.features[0].properties.id) {
     //   currentId = e.features[0].properties.id;
     //   console.log(currentId);
-    if (showRegion == "amite-extent") {
+    if (showRegion == "amite-extent" || showRegion == "amite-special-extent") {
       addCommunityPopup(e.features[0].properties.id)
       map.getCanvas().style.cursor = 'pointer';
     }
   });
 
   map.on('mouseleave', 'communities-fill', function (e) {
-    if (showRegion == "amite-extent") {
+    if (showRegion == "amite-extent" || showRegion == "amite-special-extent") {
       map.getCanvas().style.cursor = '';
       removePopup()
     }
@@ -443,7 +457,9 @@ map.on('load', function() {
   });
 
   map.on('click', 'communities-fill', function (e) {
-    buttonZoom(e.features[0].properties.id)
+    if (showRegion != "amite-special-extent") {
+      buttonZoom(e.features[0].properties.id)
+    }
   });
 
   map.on('mouseenter', 'study-areas-fill', function (e) {
