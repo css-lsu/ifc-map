@@ -127,7 +127,7 @@ button {
   width: 200px;
 }
 .loc-button:hover, .loc-button.active {
-  background-color: rgba(50,50,50,.9);
+  background-color: rgba(25,25,25,.9);
 }
 
 .loc-button p {
