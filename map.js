@@ -327,32 +327,7 @@ map.on('load', function() {
   map.removeLayer('incident-startpoints-navigation')
   map.removeSource('mapbox://mapbox.mapbox-incidents-v1')
 
-  map.addSource('study-areas-source', {
-    type: "geojson",
-    data: "geodata/StudyAreas.geojson",
-  })
 
-  map.addLayer({
-    'id': 'study-areas-line',
-    "type": "line",
-    "source": "study-areas-source",
-    "paint": {
-      "line-color": studyAreaLinePaint,
-      "line-width": 3,
-      "line-dasharray": [1, 1],
-      "line-opacity": 0,
-    }
-  })
-
-  map.addLayer({
-    'id': 'study-areas-fill',
-    "type": "fill",
-    "source": "study-areas-source",
-    "paint": {
-      "fill-color": studyAreaFillPaint,
-      "fill-opacity": 0,
-    }
-  })
 
   // old line-color match rules
   // ['match', ['get', 'ProjectType'],
@@ -407,6 +382,34 @@ map.on('load', function() {
     }
   })
 
+  map.addSource('study-areas-source', {
+    type: "geojson",
+    data: "geodata/StudyAreas.geojson",
+  })
+
+  map.addLayer({
+    'id': 'study-areas-line',
+    "type": "line",
+    "source": "study-areas-source",
+    "paint": {
+      "line-color": studyAreaLinePaint,
+      // "line-width": 3,
+      // "line-dasharray": [1, 1],
+      "line-width": 2,
+      "line-opacity": 0,
+    }
+  })
+
+  map.addLayer({
+    'id': 'study-areas-fill',
+    "type": "fill",
+    "source": "study-areas-source",
+    "paint": {
+      "fill-color": studyAreaFillPaint,
+      "fill-opacity": 0,
+    }
+  })
+
   map.addSource('amite-mask-source', {
     type: "geojson",
     data: "geodata/AmiteWatershedMask.geojson",
@@ -458,11 +461,11 @@ map.on('load', function() {
 
   map.on('click', 'communities-fill', function (e) {
     if (showRegion != "amite-special-extent") {
-      buttonZoom(e.features[0].properties.id)
+      // buttonZoom(e.features[0].properties.id)
     }
   });
 
-  map.on('mouseenter', 'study-areas-fill', function (e) {
+  map.on('mousemove', 'study-areas-fill', function (e) {
 
     // only add interaction if the map is zoomed to a specific community
     if (showRegion != "initial-extent" && showRegion != "amite-extent") {
@@ -477,6 +480,30 @@ map.on('load', function() {
       // Populate the popup and set its coordinates
       var firstCoord = e.features[0].geometry.coordinates[0][0];
       popup.setLngLat(firstCoord)
+        .setHTML(content)
+    }
+  });
+
+  map.on('click', 'study-areas-fill', function (e) {
+
+    console.log(e);
+
+    // only add interaction if the map is zoomed to a specific community
+    if (showRegion != "initial-extent" && showRegion != "amite-extent") {
+
+      removePopup();
+
+      map.getCanvas().style.cursor = 'pointer';
+
+      var props = studyAreasData[e.features[0].properties.id]
+      var content = `<p><strong>${props['Name']}</strong><br>
+                    ${props['PopupText']}</p>`;
+      popup.addClassName('popup-'+props["ProjectType"]);
+
+      // Populate the popup and set its coordinates
+      var firstCoord = e.features[0].geometry.coordinates[0][0];
+      console.log(e.features)
+      popup.setLngLat(e.lngLat)
         .setHTML(content)
     }
   });
