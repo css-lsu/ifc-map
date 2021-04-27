@@ -263,7 +263,11 @@ var buttonZoom = function (zoomTo) {
 
       communitiesFeatures.forEach(function(feature) {
         if (feature.properties.id == id) {
-          setText(communitiesData[id]["TopBarText"]);
+          if (initializedAs == "communityPage") {
+            setText(communitiesData[id]["TopBarCommunityPage"]);
+          } else {
+            setText(communitiesData[id]["TopBarMainPage"]);
+          }
           bounds = [
             feature.properties.x1,
             feature.properties.y1,
@@ -473,6 +477,9 @@ map.on('load', function() {
       map.getCanvas().style.cursor = 'pointer';
 
       var props = studyAreasData[e.features[0].properties.id]
+      if (initializedAs == "communityPage") {
+        setText(props['PopupText']);
+      }
       var content = `<p><strong>${props['Name']}</strong><br>
                     ${props['PopupText']}</p>`;
       popup.addClassName('popup-'+props["ProjectType"]);
@@ -486,8 +493,6 @@ map.on('load', function() {
 
   map.on('click', 'study-areas-fill', function (e) {
 
-    console.log(e);
-
     // only add interaction if the map is zoomed to a specific community
     if (showRegion != "initial-extent" && showRegion != "amite-extent") {
 
@@ -496,19 +501,25 @@ map.on('load', function() {
       map.getCanvas().style.cursor = 'pointer';
 
       var props = studyAreasData[e.features[0].properties.id]
+      if (initializedAs == "communityPage") {
+        setText(props['PopupText']);
+      }
       var content = `<p><strong>${props['Name']}</strong><br>
                     ${props['PopupText']}</p>`;
       popup.addClassName('popup-'+props["ProjectType"]);
 
       // Populate the popup and set its coordinates
       var firstCoord = e.features[0].geometry.coordinates[0][0];
-      console.log(e.features)
+
       popup.setLngLat(e.lngLat)
         .setHTML(content)
     }
   });
 
   map.on('mouseleave', 'study-areas-fill', function () {
+    if (initializedAs == "communityPage") {
+      setText(communitiesData[showRegion]["TopBarCommunityPage"]);
+    }
     if (showRegion != "initial-extent" && showRegion != "amite-extent") {
       map.getCanvas().style.cursor = '';
       removePopup();
